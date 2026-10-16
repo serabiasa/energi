@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Roller Coaster Energi | Laboratorium Fisika</title>
+  <style>
+    :root { color-scheme: dark; --bg:#071626; --panel:#10273b; --panel2:#153149; --line:#2c5068; --ink:#edf8ff; --muted:#a9c3d3; --ep:#ffc95d; --ek:#59ddce; --heat:#ff8f80; --em:#a595ff; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:radial-gradient(circle at 18% -6%,#1d4962 0,transparent 38%),linear-gradient(145deg,#071626,#0b1e31 65%,#081827); color:var(--ink); font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    .wrap { width:min(1200px,calc(100% - 32px)); margin:0 auto; padding:31px 0 40px; }
+    .eyebrow { display:inline-flex; align-items:center; gap:9px; color:#b7d1e0; text-transform:uppercase; letter-spacing:.16em; font-weight:800; font-size:11px; }
+    .eyebrow::before { content:""; width:8px; height:8px; border-radius:50%; background:var(--ek); box-shadow:0 0 16px var(--ek); }
+    h1 { margin:11px 0 7px; font-size:clamp(27px,3.5vw,43px); line-height:1.14; letter-spacing:-.045em; }
+    .intro { margin:0 0 24px; color:var(--muted); font-size:15px; line-height:1.5; }
+    .tabs { display:inline-flex; gap:5px; padding:5px; margin:0 0 18px; border:1px solid #34566b; border-radius:13px; background:#10293d; }
+    .tabs button { min-height:39px; border-radius:9px; padding:0 16px; background:transparent; color:#bdd5e2; font-size:13px; }
+    .tabs button[aria-selected="true"] { background:#59ddce; color:#092f35; box-shadow:0 3px 12px #06162655; }
+    [hidden] { display:none !important; }
+    .layout { display:grid; grid-template-columns:minmax(0,1.65fr) minmax(300px,.84fr); gap:18px; align-items:stretch; }
+    .card { background:linear-gradient(160deg,rgba(23,54,76,.95),rgba(13,35,54,.98)); border:1px solid rgba(154,207,233,.17); border-radius:22px; box-shadow:0 16px 45px rgba(0,0,0,.18); overflow:hidden; }
+    .scene-card { padding:20px 20px 16px; }
+    .card-head { display:flex; justify-content:space-between; gap:14px; align-items:flex-start; margin:1px 3px 12px; }
+    h2 { margin:0; font-size:18px; letter-spacing:-.02em; }
+    .small { color:var(--muted); font-size:12px; line-height:1.4; margin-top:5px; }
+    .chip { border:1px solid rgba(89,221,206,.34); background:rgba(89,221,206,.09); color:#a9efe6; padding:8px 11px; border-radius:999px; white-space:nowrap; font-size:11px; font-weight:800; letter-spacing:.02em; }
+    .scene { position:relative; border-radius:16px; overflow:hidden; background:linear-gradient(#2b6078 0%,#417c89 53%,#254b57 100%); }
+    svg { display:block; width:100%; height:auto; aspect-ratio:900/500; }
+    .scene .caption { position:absolute; left:13px; top:13px; border-radius:8px; padding:7px 10px; background:rgba(7,22,38,.74); color:#e2f4fc; font-size:12px; font-weight:650; backdrop-filter:blur(4px); }
+    .scene .bottom-tag { position:absolute; right:13px; bottom:12px; border-radius:8px; padding:6px 9px; background:rgba(7,22,38,.68); color:#e2f4fc; font-size:11px; }
+    .controls { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:18px; align-items:end; margin:20px 3px 4px; }
+    .input-panel { display:grid; gap:15px; }
+    .slider-head { display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:7px; }
+    label { font-size:14px; font-weight:800; }
+    .value { font-size:26px; line-height:1; color:var(--ep); font-weight:850; font-variant-numeric:tabular-nums; letter-spacing:-.04em; }
+    input[type="range"] { width:100%; height:10px; margin:8px 0 2px; border-radius:99px; appearance:none; background:linear-gradient(to right,var(--ep) 0%,var(--ep) var(--fill),#3b5b6b var(--fill),#3b5b6b 100%); cursor:pointer; }
+    input[type="range"]::-webkit-slider-thumb { appearance:none; width:22px; height:22px; border:4px solid #fff5d9; border-radius:50%; background:var(--ep); box-shadow:0 2px 10px #0008; }
+    input[type="range"]::-moz-range-thumb { width:15px; height:15px; border:4px solid #fff5d9; border-radius:50%; background:var(--ep); box-shadow:0 2px 10px #0008; }
+    #friction { --ep:var(--heat); }
+    #friction-value { color:var(--heat); }
+    .range-ends { display:flex; justify-content:space-between; color:var(--muted); font-size:11px; }
+    .live-readouts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin:13px 3px 0; }
+    .live-item { padding:11px 14px; border:1px solid #365a70; border-radius:12px; background:#10293d; }
+    .live-item span { display:block; margin-bottom:2px; color:var(--muted); font-size:11px; font-weight:750; }
+    .live-item strong { display:block; font-size:21px; line-height:1.25; font-variant-numeric:tabular-nums; letter-spacing:-.035em; white-space:nowrap; }
+    #live-height { color:var(--ep); } #live-speed { color:var(--ek); }
+    .buttons { display:flex; gap:8px; }
+    button { border:0; border-radius:11px; min-height:43px; padding:0 15px; font:inherit; font-weight:800; cursor:pointer; transition:transform .15s,filter .15s,background .15s; }
+    button:hover { transform:translateY(-2px); filter:brightness(1.08); }
+    button:focus-visible,input:focus-visible { outline:3px solid white; outline-offset:3px; }
+    #play { background:var(--ek); color:#0c3034; min-width:93px; }
+    #reset { background:#28475c; color:#edf8ff; border:1px solid #496b80; }
+    .meta { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding-top:15px; margin:16px 3px 0; border-top:1px solid var(--line); }
+    .meta span { padding:6px 9px; border-radius:8px; background:rgba(174,209,229,.08); color:#c9deea; font-size:11px; font-weight:650; }
+    .chart-card { padding:21px 20px 17px; display:flex; flex-direction:column; }
+    .chart-top { display:flex; justify-content:space-between; gap:10px; align-items:start; }
+    .unit { color:var(--muted); font-size:12px; font-weight:700; margin-top:3px; }
+    .chart { position:relative; flex:1; min-height:330px; margin-top:14px; padding:12px 8px 0 46px; display:flex; flex-direction:column; }
+    .plot { position:relative; flex:1; min-height:230px; border-bottom:2px solid #8bb2c6; display:flex; align-items:end; justify-content:space-around; gap:9px; padding:0 6px; background:repeating-linear-gradient(to top,transparent 0,transparent calc(25% - 1px),rgba(160,203,226,.16) 25%); }
+    .axis { position:absolute; left:0; top:12px; bottom:50px; width:40px; display:flex; flex-direction:column; justify-content:space-between; color:#95b4c5; font-size:10px; text-align:right; padding-right:5px; font-variant-numeric:tabular-nums; }
+    .bar-col { height:100%; width:26%; display:flex; flex-direction:column; justify-content:end; align-items:center; position:relative; }
+    .bar { width:min(57px,100%); min-height:0; border-radius:9px 9px 0 0; height:var(--height); transition:height .09s linear; position:relative; box-shadow:inset 0 1px 0 #ffffff70,0 0 18px color-mix(in srgb,var(--bar) 25%,transparent); background:linear-gradient(145deg,color-mix(in srgb,var(--bar) 88%,white),var(--bar)); }
+    .bar::after { content:""; position:absolute; inset:0; border-radius:inherit; background:linear-gradient(90deg,#ffffff22,transparent 42%); }
+    .bar.ep { --bar:var(--ep); } .bar.ek { --bar:var(--ek); } .bar.heat { --bar:var(--heat); } .bar.em { --bar:var(--em); }
+    .bar-labels { flex:0 0 50px; display:flex; justify-content:space-around; padding:9px 6px 0; gap:9px; }
+    .bar-labels div { width:26%; text-align:center; font-size:12px; font-weight:900; }
+    .bar-labels b { display:block; margin-top:3px; font-size:16px; font-variant-numeric:tabular-nums; }
+    .variables-mode .chart,.friction-mode .chart { padding-left:58px; }
+    .variables-mode .axis,.friction-mode .axis { width:52px; }
+    .variables-mode .bar-labels b { font-size:13px; }
+    .friction-mode .plot,.friction-mode .bar-labels { gap:3px; padding-left:2px; padding-right:2px; }
+    .friction-mode .bar-col,.friction-mode .bar-labels>div { width:24%; }
+    .friction-mode .bar-labels b { font-size:12px; letter-spacing:-.04em; white-space:nowrap; }
+    .ep-ink { color:var(--ep); } .ek-ink { color:var(--ek); } .heat-ink { color:var(--heat); } .em-ink { color:var(--em); }
+    .chart-note { border-top:1px solid var(--line); padding:13px 3px 0; margin-top:12px; min-height:61px; color:#bfd6e3; font-size:13px; line-height:1.45; }
+    .prompt { margin-top:18px; background:rgba(176,203,222,.075); border:1px solid rgba(154,207,233,.13); border-radius:15px; padding:15px 18px; color:#c8ddea; font-size:13px; line-height:1.55; }
+    .prompt strong { color:white; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    @media(max-width:830px) { .layout { grid-template-columns:1fr; } .chart { min-height:270px; } .plot { min-height:200px; } }
+    @media(max-width:550px) { .wrap { width:min(100% - 20px,1200px); padding:21px 0 28px; } .scene-card,.chart-card { padding:15px; } .controls { grid-template-columns:1fr; } .buttons { width:100%; } .buttons button { flex:1; } .chip { font-size:10px; } .chart { min-height:250px; } .plot { min-height:180px; } .bar-labels b { font-size:13px; } .friction-mode .bar-labels b { font-size:11px; } .tabs { display:flex; } .tabs button { flex:1; padding:0 8px; font-size:12px; } .live-item strong { font-size:17px; } }
+    @media(max-width:420px) { .live-readouts { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <div class="eyebrow">Laboratorium fisika interaktif</div>
+  <h1>Roller coaster energi</h1>
+  <p class="intro">Atur kondisi awal kereta, jalankan, lalu amati perubahan energi saat kereta meluncur turun.</p>
+  <div class="tabs" role="tablist" aria-label="Mode simulasi">
+    <button id="tab-ep" type="button" role="tab" aria-selected="true" aria-controls="panel-ep">EP awal</button>
+    <button id="tab-variables" type="button" role="tab" aria-selected="false" aria-controls="panel-variables">Massa + ketinggian</button>
+    <button id="tab-friction" type="button" role="tab" aria-selected="false" aria-controls="panel-friction">Dengan gesekan</button>
+  </div>
+  <div class="layout">
+    <section class="card scene-card" aria-labelledby="scene-title">
+      <div class="card-head"><div><h2 id="scene-title">Lintasan menurun</h2><div class="small" id="status" role="status">Siap meluncur</div></div><span class="chip" id="friction-chip">TANPA GESEKAN</span></div>
+      <div class="scene">
+        <svg viewBox="0 0 900 500" role="img" aria-label="Kereta roller coaster di lintasan menurun; posisinya berubah selama simulasi">
+          <defs>
+            <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#2b6078"/><stop offset="1" stop-color="#78a9a4"/></linearGradient>
+            <linearGradient id="ground" x2="0" y2="1"><stop stop-color="#24525a"/><stop offset="1" stop-color="#173b48"/></linearGradient>
+            <filter id="shadow"><feGaussianBlur stdDeviation="7"/></filter>
+          </defs>
+          <rect width="900" height="500" fill="url(#sky)"/>
+          <circle cx="752" cy="105" r="39" fill="#ffdf91" opacity=".9"/><circle cx="752" cy="105" r="63" fill="#ffdf91" opacity=".13"/>
+          <path d="M0 300 Q110 245 240 295 T490 289 T900 273 V500 H0Z" fill="#396f75" opacity=".45"/>
+          <path d="M0 362 Q135 314 260 367 T530 333 T900 338 V500 H0Z" fill="#285e68" opacity=".5"/>
+          <path d="M0 451 Q230 421 407 450 T900 436 V500 H0Z" fill="url(#ground)"/>
+          <g id="supports" stroke="#183b4c" stroke-width="7" opacity=".83"></g>
+          <path id="track-shadow" fill="none" stroke="#123345" stroke-width="25" stroke-linecap="round" stroke-linejoin="round" opacity=".6" filter="url(#shadow)" transform="translate(0 9)"/>
+          <g id="sleepers" stroke="#173d4c" stroke-width="17" stroke-linecap="round"></g>
+          <path id="track-bed" fill="none" stroke="#183949" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"/>
+          <path id="track" fill="none" stroke="#b4d6d9" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path id="track-glint" fill="none" stroke="#edfafa" stroke-width="2" stroke-linecap="round" opacity=".7"/>
+          <g id="start-marker"><circle r="8" fill="#ffc95d" stroke="#fff5d8" stroke-width="3"/><text x="52" y="-10" fill="#fff5d8" font-size="16" font-weight="800">START</text></g>
+          <g id="cart">
+            <ellipse cx="0" cy="1" rx="45" ry="8" fill="#082638" opacity=".32"/>
+            <circle cx="-23" cy="-10" r="10" fill="#0b2939" stroke="#b9e9ef" stroke-width="4"/><circle cx="23" cy="-10" r="10" fill="#0b2939" stroke="#b9e9ef" stroke-width="4"/>
+            <path d="M-41 -37 Q-40 -46 -31 -46 H32 Q43 -46 42 -36 L34 -22 Q0 -12 -34 -22Z" fill="#fb826d" stroke="#ffccb1" stroke-width="3"/>
+            <path d="M-30 -43 H29 L25 -31 H-27Z" fill="#a63e50" opacity=".55"/>
+            <circle cx="-5" cy="-61" r="11" fill="#ffe4bc"/><path d="M-17 -65 Q-16 -79 -2 -76 Q7 -76 9 -67" fill="#14364b"/>
+            <path d="M-19 -47 Q-14 -57 -3 -53 L12 -44Z" fill="#fff0c5"/>
+          </g>
+        </svg>
+        <div class="caption" id="height-label">Ketinggian: 8,0 m</div>
+        <div class="bottom-tag">Dasar lintasan = 0 m</div>
+      </div>
+      <div class="live-readouts" id="live-readouts" hidden aria-live="off">
+        <div class="live-item"><span>KETINGGIAN SAAT INI</span><strong id="live-height">8,0000 m</strong></div>
+        <div class="live-item"><span>KECEPATAN SAAT INI</span><strong id="live-speed">0,0000 m/s</strong></div>
+      </div>
+      <div class="controls">
+        <div>
+          <div class="input-panel" id="panel-ep" role="tabpanel" aria-labelledby="tab-ep">
+            <div class="slider-block">
+              <div class="slider-head"><label for="energy">Energi potensial awal</label><output class="value" id="energy-value" for="energy">8.000 J</output></div>
+              <input id="energy" type="range" min="1000" max="10000" step="500" value="8000" style="--fill:77.78%" aria-describedby="slider-note">
+              <div class="range-ends"><span>1.000 J</span><span>10.000 J</span></div>
+            </div>
+          </div>
+          <div class="input-panel" id="panel-variables" role="tabpanel" aria-labelledby="tab-variables" hidden>
+            <div class="slider-block">
+              <div class="slider-head"><label for="mass">Massa kereta</label><output class="value" id="mass-value" for="mass">100 kg</output></div>
+              <input id="mass" type="range" min="50" max="200" step="10" value="100" style="--fill:33.33%" aria-describedby="variable-note">
+              <div class="range-ends"><span>50 kg</span><span>200 kg</span></div>
+            </div>
+            <div class="slider-block">
+              <div class="slider-head"><label for="start-height">Ketinggian awal</label><output class="value" id="start-height-value" for="start-height">8,0 m</output></div>
+              <input id="start-height" type="range" min="1" max="50" step="0.5" value="8" style="--fill:14.29%" aria-describedby="variable-note">
+              <div class="range-ends"><span>1 m</span><span>50 m</span></div>
+            </div>
+          </div>
+          <div class="input-panel" id="panel-friction" role="tabpanel" aria-labelledby="tab-friction" hidden>
+            <div class="slider-block">
+              <div class="slider-head"><label for="friction-mass">Massa kereta</label><output class="value" id="friction-mass-value" for="friction-mass">100 kg</output></div>
+              <input id="friction-mass" type="range" min="50" max="200" step="10" value="100" style="--fill:33.33%" aria-describedby="variable-note">
+              <div class="range-ends"><span>50 kg</span><span>200 kg</span></div>
+            </div>
+            <div class="slider-block">
+              <div class="slider-head"><label for="friction-height">Ketinggian awal</label><output class="value" id="friction-height-value" for="friction-height">8,0 m</output></div>
+              <input id="friction-height" type="range" min="1" max="50" step="0.5" value="8" style="--fill:14.29%" aria-describedby="variable-note">
+              <div class="range-ends"><span>1 m</span><span>50 m</span></div>
+            </div>
+            <div class="slider-block">
+              <div class="slider-head"><label for="friction">Gesekan</label><output class="value" id="friction-value" for="friction">30%</output></div>
+              <input id="friction" type="range" min="0" max="80" step="5" value="30" style="--fill:37.5%" aria-describedby="friction-explain">
+              <div class="range-ends"><span>0%</span><span>80%</span></div>
+              <div class="small" id="friction-explain">Persentase EP yang berkurang dan berubah menjadi panas (Q). EM = EP + EK; Total = EP + EK + Q.</div>
+            </div>
+          </div>
+        </div>
+        <div class="buttons"><button id="play" type="button" aria-label="Jalankan simulasi">▶ Mulai</button><button id="reset" type="button">↺ Ulang</button></div>
+      </div>
+      <div class="meta" id="slider-note"><span id="mass-note">Massa kereta: 100 kg</span><span>Gravitasi: 10 m/s²</span><span id="mode-note">Ketinggian awal menyesuaikan EP</span></div>
+      <span id="variable-note" class="sr-only">Angka ketinggian, kecepatan, dan energi yang tampil dibulatkan.</span>
+    </section>
+    <section class="card chart-card" aria-labelledby="chart-title">
+      <div class="chart-top"><div><h2 id="chart-title">Energi dalam sistem</h2><div class="small">Bandingkan tinggi batang saat kereta bergerak.</div></div><span class="unit">Satuan: joule (J)</span></div>
+      <div class="chart" id="energy-chart" aria-label="Diagram batang energi potensial, kinetik, dan mekanik">
+        <div class="axis"><span id="axis-max">8.000</span><span id="axis-mid">4.000</span><span>0</span></div>
+        <div class="plot"><div class="bar-col"><div class="bar ep" id="bar-ep" style="--height:100%"></div></div><div class="bar-col"><div class="bar ek" id="bar-ek" style="--height:0%"></div></div><div class="bar-col" id="heat-column" hidden><div class="bar heat" id="bar-heat" style="--height:0%"></div></div><div class="bar-col"><div class="bar em" id="bar-em" style="--height:100%"></div></div></div>
+        <div class="bar-labels"><div class="ep-ink">EP<b id="ep-num">8.000 J</b></div><div class="ek-ink">EK<b id="ek-num">0 J</b></div><div class="heat-ink" id="heat-label" hidden>Q<b id="heat-num">0</b></div><div class="em-ink"><span id="em-label">EM</span><b id="em-num">8.000 J</b></div></div>
+      </div>
+      <div class="chart-note" id="chart-note">Tekan <strong>Mulai</strong> dan perhatikan apa yang berubah ketika kereta turun.</div>
+    </section>
+  </div>
+  <div class="prompt" id="prompt"><strong>Coba amati:</strong> Apa yang terjadi pada EP dan EK ketika kereta makin rendah? Bagaimana tinggi batang EM dari awal sampai akhir?</div>
+</main>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const slider = $('energy'), massSlider = $('mass'), heightSlider = $('start-height');
+  const frictionMassSlider = $('friction-mass'), frictionHeightSlider = $('friction-height'), frictionSlider = $('friction');
+  const play = $('play'), reset = $('reset');
+  const fixedMass = 100, gravity = 10;
+  const x0 = 75, run = 720, baseY = 439;
+  let activeMode = 'ep', mass = fixedMass, startHeight = 8, frictionRate = 0;
+  let initialEnergy = Number(slider.value), startU = 0, u = 0, velocity = 0;
+  let running = false, finished = false, previousTime = 0, frame = 0;
+  const fmt = n => Math.round(n).toLocaleString('id-ID');
+  const fixed = (n, digits) => n.toLocaleString('id-ID',{minimumFractionDigits:digits,maximumFractionDigits:digits});
+  const maximumHeight = () => activeMode==='ep' ? 10 : 50;
+  const pxPerMeter = () => 350/maximumHeight();
+  const height = q => maximumHeight() * Math.pow(Math.max(0,1-q),1.3);
+  const point = q => ({x:x0+run*q,y:baseY-pxPerMeter()*height(q)});
+  const derivative = q => -1.3*maximumHeight()*Math.pow(Math.max(0,1-q),.3);
+  const angle = q => Math.atan2(-pxPerMeter()*derivative(q),run)*180/Math.PI;
+  const setStatus = text => { $('status').textContent=text; };
+  function buildTrack() {
+    let d='';
+    for (let i=0;i<=100;i++) { const p=point(i/100); d+=(i?' L ':'M ')+p.x.toFixed(2)+' '+p.y.toFixed(2); }
+    for (const id of ['track-shadow','track-bed','track','track-glint']) $(id).setAttribute('d',d);
+    const supports=$('supports'), sleepers=$('sleepers');
+    for(let i=3;i<=18;i++) {
+      const q=i/20,p=point(q),a=angle(q)*Math.PI/180;
+      const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1',p.x);line.setAttribute('x2',p.x);line.setAttribute('y1',p.y+5);line.setAttribute('y2',Math.max(p.y+6,461));supports.appendChild(line);
+      const sleeper=document.createElementNS('http://www.w3.org/2000/svg','line');
+      sleeper.setAttribute('x1',p.x-12*Math.sin(a));sleeper.setAttribute('y1',p.y+12*Math.cos(a));
+      sleeper.setAttribute('x2',p.x+12*Math.sin(a));sleeper.setAttribute('y2',p.y-12*Math.cos(a));sleepers.appendChild(sleeper);
+    }
+  }
+  function update() {
+    const h=height(u), potential=Math.min(initialEnergy,mass*gravity*h);
+    const lostPotential=Math.max(0,initialEnergy-potential);
+    const heat=frictionRate*lostPotential, kinetic=lostPotential-heat;
+    const speed=Math.sqrt(2*kinetic/mass);
+    const p=point(u), s=point(startU);
+    $('cart').setAttribute('transform',`translate(${p.x.toFixed(2)} ${p.y.toFixed(2)}) rotate(${angle(u).toFixed(2)})`);
+    $('start-marker').setAttribute('transform',`translate(${s.x.toFixed(2)} ${(s.y-39).toFixed(2)})`);
+    $('height-label').textContent=`Ketinggian: ${h.toLocaleString('id-ID',{minimumFractionDigits:1,maximumFractionDigits:1})} m`;
+    if (activeMode!=='ep') {
+      $('live-height').textContent=fixed(h,4)+' m';
+      $('live-speed').textContent=fixed(speed,4)+' m/s';
+    }
+    $('bar-ep').style.setProperty('--height',`${100*potential/initialEnergy}%`);
+    $('bar-ek').style.setProperty('--height',`${100*kinetic/initialEnergy}%`);
+    $('bar-heat').style.setProperty('--height',`${100*heat/initialEnergy}%`);
+    $('bar-em').style.setProperty('--height','100%');
+    const shownEP=Math.round(potential), shownHeat=Math.round(heat);
+    const shownEK=initialEnergy-shownEP-shownHeat;
+    const suffix=activeMode==='ep' ? ' J' : '';
+    $('ep-num').textContent=fmt(shownEP)+suffix;$('ek-num').textContent=fmt(shownEK)+suffix;
+    $('heat-num').textContent=fmt(shownHeat);$('em-num').textContent=fmt(initialEnergy)+suffix;
+    $('axis-max').textContent=fmt(initialEnergy);$('axis-mid').textContent=fmt(initialEnergy/2);
+  }
+  function pause() { running=false; cancelAnimationFrame(frame); previousTime=0; play.textContent='▶ Lanjut'; play.setAttribute('aria-label','Lanjutkan simulasi'); setStatus('Berhenti sementara'); }
+  function restart() {
+    running=false; cancelAnimationFrame(frame); previousTime=0; velocity=0; finished=false;
+    mass=activeMode==='ep' ? fixedMass : activeMode==='variables' ? Number(massSlider.value) : Number(frictionMassSlider.value);
+    startHeight=activeMode==='ep' ? Number(slider.value)/(mass*gravity) : activeMode==='variables' ? Number(heightSlider.value) : Number(frictionHeightSlider.value);
+    frictionRate=activeMode==='friction' ? Number(frictionSlider.value)/100 : 0;
+    initialEnergy=mass*gravity*startHeight;
+    startU=1-Math.pow(startHeight/maximumHeight(),1/1.3);
+    u=startU;
+    $('energy-value').textContent=fmt(Number(slider.value))+' J';
+    slider.style.setProperty('--fill',`${(Number(slider.value)-1000)/90}%`);
+    $('mass-value').textContent=fmt(Number(massSlider.value))+' kg';
+    $('start-height-value').textContent=fixed(Number(heightSlider.value),1)+' m';
+    massSlider.style.setProperty('--fill',`${(Number(massSlider.value)-50)/1.5}%`);
+    heightSlider.style.setProperty('--fill',`${(Number(heightSlider.value)-1)/49*100}%`);
+    $('friction-mass-value').textContent=fmt(Number(frictionMassSlider.value))+' kg';
+    $('friction-height-value').textContent=fixed(Number(frictionHeightSlider.value),1)+' m';
+    $('friction-value').textContent=fmt(Number(frictionSlider.value))+'%';
+    frictionMassSlider.style.setProperty('--fill',`${(Number(frictionMassSlider.value)-50)/1.5}%`);
+    frictionHeightSlider.style.setProperty('--fill',`${(Number(frictionHeightSlider.value)-1)/49*100}%`);
+    frictionSlider.style.setProperty('--fill',`${Number(frictionSlider.value)/80*100}%`);
+    $('mass-note').textContent=`Massa kereta: ${mass} kg`;
+    if (activeMode==='friction') {
+      $('friction-chip').textContent=`GESEKAN ${frictionSlider.value}%`;
+      $('mode-note').textContent=`Energi total awal: ${fmt(initialEnergy)} J`;
+    }
+    play.textContent='▶ Mulai'; play.setAttribute('aria-label','Jalankan simulasi');
+    setStatus('Siap meluncur');
+    $('chart-note').innerHTML=activeMode==='friction'
+      ? 'Tekan <strong>Mulai</strong>. Amati EP, EK, Q, dan batang Total selama kereta turun.'
+      : 'Tekan <strong>Mulai</strong> dan perhatikan apa yang berubah ketika kereta turun.';
+    update();
+  }
+  function tick(time) {
+    if (!running) return;
+    if (!previousTime) previousTime=time;
+    let remaining=Math.min((time-previousTime)/1000,.065); previousTime=time;
+    while (remaining>0 && u<1) {
+      const dt=Math.min(remaining,.012), slope=-derivative(u), dsdu=Math.hypot(20,slope);
+      velocity += gravity*(1-frictionRate)*slope/dsdu*dt;
+      u=Math.min(1,u+velocity/dsdu*dt); remaining-=dt;
+    }
+    if (u>=1) {
+      u=1; running=false; finished=true; previousTime=0;
+      play.textContent='▶ Lagi';play.setAttribute('aria-label','Jalankan lagi dari awal');
+      setStatus('Sudah sampai di dasar lintasan');
+      $('chart-note').textContent=activeMode==='friction'
+        ? 'Di dasar lintasan, bandingkan EK dan Q. Batang Total tetap sama dengan energi awal.'
+        : 'Di dasar lintasan, bandingkan kembali ketiga nilai energi.';
+    }
+    update();
+    if (running) frame=requestAnimationFrame(tick);
+  }
+  function start() {
+    if (running) { pause(); return; }
+    if (finished) restart();
+    running=true; previousTime=0;
+    play.textContent='Ⅱ Jeda'; play.setAttribute('aria-label','Jeda simulasi');
+    setStatus('Kereta sedang meluncur');
+    $('chart-note').textContent=activeMode==='friction'
+      ? 'Amati EP turun, Q naik, dan batang Total tetap setinggi energi awal.'
+      : 'Amati tinggi batang EP, EK, dan EM selama kereta turun.';
+    frame=requestAnimationFrame(tick);
+  }
+  function selectMode(mode) {
+    if (mode===activeMode) return;
+    activeMode=mode;
+    document.body.classList.toggle('variables-mode',mode==='variables');
+    document.body.classList.toggle('friction-mode',mode==='friction');
+    $('tab-ep').setAttribute('aria-selected',String(mode==='ep'));
+    $('tab-variables').setAttribute('aria-selected',String(mode==='variables'));
+    $('tab-friction').setAttribute('aria-selected',String(mode==='friction'));
+    $('panel-ep').hidden=mode!=='ep'; $('panel-variables').hidden=mode!=='variables'; $('panel-friction').hidden=mode!=='friction';
+    $('live-readouts').hidden=mode==='ep'; $('height-label').hidden=mode!=='ep';
+    $('heat-column').hidden=mode!=='friction'; $('heat-label').hidden=mode!=='friction';
+    $('em-label').textContent=mode==='friction' ? 'Total' : 'EM';
+    $('energy-chart').setAttribute('aria-label',mode==='friction'
+      ? 'Diagram batang energi potensial, kinetik, panas, dan total energi'
+      : 'Diagram batang energi potensial, kinetik, dan mekanik');
+    $('friction-chip').textContent=mode==='friction' ? `GESEKAN ${frictionSlider.value}%` : 'TANPA GESEKAN';
+    $('mode-note').textContent=mode==='ep' ? 'Ketinggian awal menyesuaikan EP' : 'Angka pada layar dibulatkan';
+    $('prompt').innerHTML=mode==='ep'
+      ? '<strong>Coba amati:</strong> Apa yang terjadi pada EP dan EK ketika kereta makin rendah? Bagaimana tinggi batang EM dari awal sampai akhir?'
+      : mode==='variables'
+      ? '<strong>Coba bandingkan:</strong> Ubah massa atau ketinggian awal. Apa yang berubah pada energi dan kecepatan kereta di dasar lintasan?'
+      : '<strong>Coba selidiki:</strong> Naikkan gesekan. Saat kereta sampai di dasar, bagaimana perbandingan EK dan Q? Apa yang terjadi pada batang Total?';
+    restart();
+  }
+  $('tab-ep').addEventListener('click',()=>selectMode('ep'));
+  $('tab-variables').addEventListener('click',()=>selectMode('variables'));
+  $('tab-friction').addEventListener('click',()=>selectMode('friction'));
+  const modes=['ep','variables','friction'];
+  for (const tab of modes.map(mode=>$('tab-'+mode))) tab.addEventListener('keydown',event=>{
+    if (event.key==='ArrowLeft'||event.key==='ArrowRight') {
+      event.preventDefault();
+      const direction=event.key==='ArrowRight' ? 1 : -1;
+      const next=modes[(modes.indexOf(tab.id.slice(4))+direction+modes.length)%modes.length];
+      selectMode(next); $('tab-'+next).focus();
+    }
+  });
+  slider.addEventListener('input',restart); massSlider.addEventListener('input',restart); heightSlider.addEventListener('input',restart);
+  frictionMassSlider.addEventListener('input',restart); frictionHeightSlider.addEventListener('input',restart); frictionSlider.addEventListener('input',restart);
+  play.addEventListener('click',start); reset.addEventListener('click',restart);
+  buildTrack(); restart();
+})();
+</script>
+</body>
+</html>
