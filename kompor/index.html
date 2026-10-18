@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kalor dan Gerak Molekul Air</title>
+  <style>
+    :root{color-scheme:dark;--bg:#071622;--panel:#0f2837;--line:#315064;--text:#f3f7f6;--muted:#a9c0c6;--cyan:#79d8e8;--warm:#ffb36b}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:radial-gradient(circle at 80% 0%,#173d4c 0%,transparent 45%),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .page{max-width:1150px;margin:auto;padding:32px 20px 44px}
+    .eyebrow{color:var(--cyan);font-size:.74rem;font-weight:850;letter-spacing:.16em;text-transform:uppercase}
+    h1{font-size:clamp(2rem,5vw,3.55rem);line-height:1.05;letter-spacing:-.04em;margin:10px 0 10px}
+    header p{max-width:670px;color:var(--muted);margin:0 0 24px;line-height:1.55}
+    .layout{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(270px,.8fr);gap:18px;align-items:stretch}
+    .card{background:linear-gradient(160deg,#132e40,#0d2230);border:1px solid var(--line);border-radius:24px;box-shadow:0 20px 70px #0003;overflow:hidden}
+    .scene-card{position:relative;padding:12px}
+    .scene-top{display:flex;justify-content:flex-end;align-items:center;padding:9px 10px 2px;gap:12px}
+    .status{display:flex;align-items:center;gap:7px;font-size:.8rem;color:var(--muted)}
+    .status i{width:7px;height:7px;border-radius:50%;background:#6fdabb;display:inline-block;box-shadow:0 0 12px #6fdabb}
+    svg{display:block;width:100%;height:auto;user-select:none;-webkit-user-select:none}
+    #knob{cursor:grab;touch-action:none;outline:none}
+    #knob:active{cursor:grabbing}
+    #knob:focus-visible .knob-focus{stroke:#9beeff;stroke-width:4;opacity:1}
+    .side{display:flex;flex-direction:column;gap:18px}
+    .readout{padding:23px 24px}
+    .small-heading{font-size:.72rem;font-weight:800;letter-spacing:.13em;color:var(--muted);text-transform:uppercase}
+    .temperature{font-size:3.9rem;font-variant-numeric:tabular-nums;letter-spacing:-.065em;line-height:1.1;font-weight:780;margin:14px 0 5px}
+    .temperature span{font-size:1.35rem;letter-spacing:0;color:var(--cyan);font-weight:650}
+    .meter{height:9px;border-radius:12px;background:#264154;overflow:hidden;margin:19px 0 13px}
+    .meter-fill{height:100%;width:0%;border-radius:12px;background:linear-gradient(90deg,#73d5e8,#fabb73);transition:width .15s linear}
+    .subline{font-size:.9rem;color:var(--muted);line-height:1.5}
+    .subline b{color:#f2f7f7}
+    .power{padding:23px 24px;flex:1}
+    .power-value{font-size:2.5rem;font-weight:780;letter-spacing:-.045em;margin:11px 0 6px;font-variant-numeric:tabular-nums}
+    .power-value span{font-size:1rem;color:var(--muted);font-weight:550;letter-spacing:0}
+    .instruction{color:var(--muted);line-height:1.6;font-size:.9rem;margin:0 0 21px}
+    button{background:#224052;color:var(--text);border:1px solid #527185;border-radius:12px;padding:10px 15px;font:inherit;font-weight:700;cursor:pointer}
+    button:hover{background:#31566c}
+    button:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+    .note{color:#b8d0d4;font-size:.83rem;line-height:1.55;margin:17px 3px 0}
+    .note strong{color:#f0f4f2}
+    @media(max-width:820px){.layout{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr}.page{padding:24px 14px}.temperature{font-size:3rem}}
+    @media(max-width:540px){.side{grid-template-columns:1fr}.scene-card{padding:5px}.scene-top{padding:12px 12px 0}.note{margin:16px 7px 0}}
+    @media(prefers-reduced-motion:reduce){.meter-fill{transition:none}}
+  </style>
+</head>
+<body>
+<main class="page">
+  <header>
+    <div class="eyebrow">Simulasi kalor · Kelas X</div>
+    <h1>Panaskan air. Amati molekulnya.</h1>
+    <p>Putar kenop kompor untuk mengubah besar api. Perhatikan suhu air dan gerak titik-titik molekul ketika api diperbesar atau dikecilkan.</p>
+  </header>
+  <div class="layout">
+    <section class="card scene-card" aria-label="Animasi panci berisi air di atas kompor">
+      <div class="scene-top"><span class="status"><i></i><span id="status">Api mati</span></span></div>
+      <svg id="stage" viewBox="0 0 820 560" role="img" aria-label="Panci berisi molekul air di atas kompor; putar kenop pada bagian kanan bawah" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#173a4b"/><stop offset="1" stop-color="#102b3c"/></linearGradient>
+          <linearGradient id="water" x2="0" y2="1"><stop stop-color="#5abdd0" stop-opacity=".62"/><stop offset="1" stop-color="#2f91b1" stop-opacity=".88"/></linearGradient>
+          <linearGradient id="pot" x2="0" y2="1"><stop stop-color="#a7bac1"/><stop offset=".35" stop-color="#e1eaeb"/><stop offset="1" stop-color="#748e9c"/></linearGradient>
+          <radialGradient id="glow"><stop stop-color="#ffad60" stop-opacity=".58"/><stop offset="1" stop-color="#ffad60" stop-opacity="0"/></radialGradient>
+          <filter id="steamSoft" x="-80%" y="-40%" width="260%" height="180%"><feGaussianBlur stdDeviation="1.4"/></filter>
+          <clipPath id="waterClip"><path d="M173 211 Q410 217 647 211 L632 353 Q410 375 188 353 Z"/></clipPath>
+          <clipPath id="levelClip"><rect id="waterLevelClip" x="160" y="211" width="500" height="170"/></clipPath>
+        </defs>
+        <rect width="820" height="560" rx="18" fill="url(#sky)"/>
+        <path d="M0 417 H820" stroke="#365262" stroke-width="2"/>
+        <g opacity=".45" stroke="#5a7581" stroke-width="2"><path d="M37 402 H110"/><path d="M709 402 H782"/></g>
+        <ellipse id="heatGlow" cx="410" cy="423" rx="142" ry="80" fill="url(#glow)" opacity="0"/>
+        <g id="flames" opacity="0">
+          <path d="M333 442 C297 406 329 392 340 366 C339 397 367 399 362 426 Q352 443 333 442Z" fill="#ff8751"/>
+          <path d="M378 442 C341 402 382 375 395 337 C397 383 435 397 414 432 Q398 450 378 442Z" fill="#ffa257"/>
+          <path d="M421 442 C395 414 427 390 447 356 C443 390 475 407 458 434 Q442 449 421 442Z" fill="#ff764e"/>
+          <path d="M386 441 C367 411 393 398 405 373 C402 405 425 417 412 439Z" fill="#ffe398"/>
+          <path d="M431 440 C418 421 441 407 448 389 C446 413 458 426 450 440Z" fill="#ffd17b"/>
+        </g>
+        <ellipse cx="410" cy="447" rx="112" ry="13" fill="#071622" opacity=".65"/>
+        <path d="M286 440 H534 L550 454 H270 Z" fill="#536976"/>
+        <path d="M100 449 Q100 439 112 439 H708 Q720 439 720 449 V514 Q720 526 708 526 H112 Q100 526 100 514Z" fill="#365468" stroke="#7a98a6" stroke-width="3"/>
+        <path d="M101 460 H719" stroke="#8faab1" stroke-opacity=".45" stroke-width="3"/>
+        <path d="M123 526 V537 M699 526 V537" stroke="#263e4a" stroke-width="14" stroke-linecap="round"/>
+        <path d="M121 244 Q91 238 90 264 V288 Q91 309 143 307" fill="none" stroke="#99adb6" stroke-width="20" stroke-linecap="round"/>
+        <path d="M699 244 Q729 238 730 264 V288 Q729 309 677 307" fill="none" stroke="#99adb6" stroke-width="20" stroke-linecap="round"/>
+        <g id="steam" aria-hidden="true" filter="url(#steamSoft)"></g>
+        <path d="M143 180 Q410 169 677 180 L650 369 Q410 392 170 369 Z" fill="url(#pot)" stroke="#dce7e8" stroke-width="5"/>
+        <path d="M162 205 Q410 213 658 205 L639 355 Q410 379 181 355 Z" fill="#233f50"/>
+        <g clip-path="url(#waterClip)">
+          <g clip-path="url(#levelClip)">
+            <path d="M173 211 Q410 217 647 211 L632 353 Q410 375 188 353 Z" fill="url(#water)"/>
+            <g id="molecules"></g>
+          </g>
+        </g>
+        <path id="waterSurface" d="M174 215 Q410 207 646 215" fill="none" stroke="#a9eef2" stroke-width="4" opacity=".84"/>
+        <path d="M145 182 Q410 170 675 182" fill="none" stroke="#f2f6f5" stroke-width="10" stroke-linecap="round"/>
+        <path d="M181 239 L188 339" stroke="#e5f5f2" opacity=".38" stroke-width="7" stroke-linecap="round"/>
+        <path d="M631 242 L623 340" stroke="#e5f5f2" opacity=".3" stroke-width="5" stroke-linecap="round"/>
+        <g aria-hidden="true">
+          <circle cx="594" cy="489" r="34" fill="#243e50" stroke="#98acb7" stroke-width="3"/>
+          <circle cx="594" cy="489" r="28" fill="none" stroke="#607e8d" stroke-width="2"/>
+          <g id="dialPointer" transform="rotate(-135 594 489)"><path d="M594 458 V470" stroke="#f7ca84" stroke-width="5" stroke-linecap="round"/></g>
+          <circle cx="594" cy="489" r="5" fill="#93adba"/>
+          <text x="542" y="496" font-size="13" fill="#d7e4e4" font-weight="750">0</text>
+          <text x="643" y="496" font-size="13" fill="#d7e4e4" font-weight="750">MAX</text>
+        </g>
+        <g id="knob" role="slider" tabindex="0" aria-label="Besar api kompor" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Api mati" aria-orientation="horizontal">
+          <circle class="knob-focus" cx="594" cy="489" r="39" fill="none" stroke="none" opacity="0"/>
+          <circle cx="594" cy="489" r="39" fill="transparent"/>
+        </g>
+        <text x="126" y="506" fill="#f1e3cd" font-size="39" font-style="italic" font-family="Brush Script MT, Segoe Script, Snell Roundhand, URW Chancery L, cursive">Inflammate</text>
+      </svg>
+    </section>
+    <div class="side">
+      <section class="card readout" aria-label="Pengamatan suhu air">
+        <div class="small-heading">Suhu air · ilustrasi</div>
+        <div class="temperature"><output id="temperature">25.0</output><span> °C</span></div>
+        <div class="meter"><div class="meter-fill" id="tempFill"></div></div>
+        <div class="subline">Gerak molekul: <b id="motionLabel">pelan</b></div>
+        <div style="border-top:1px solid #315064;margin:22px 0 18px"></div>
+        <div class="small-heading">Air tersisa</div>
+        <div class="power-value" style="font-size:2rem;margin:8px 0 0"><output id="waterValue">100</output><span> %</span></div>
+        <div class="meter" style="margin:11px 0 11px"><div class="meter-fill" id="waterFill" style="width:100%;background:#79d8e8"></div></div>
+        <div class="subline" id="phaseLabel">Air belum mendidih</div>
+      </section>
+      <section class="card power" aria-label="Petunjuk pengoperasian">
+        <div class="small-heading">Besar api</div>
+        <div class="power-value"><output id="powerValue">0</output><span> / 100</span></div>
+        <p class="instruction">Putar kenop di kompor dengan mouse atau jari. Pakai tombol panah kiri/kanan saat kenop dipilih. Tunggu beberapa detik setelah mengubah api.</p>
+        <button type="button" id="reset">Atur ulang</button>
+      </section>
+    </div>
+  </div>
+  <p class="note"><strong>Catatan model:</strong> Titik-titik menggambarkan gerak molekul. Pada posisi 0, molekul tetap bergerak. Pengurangan jumlah air dimulai saat 100°C dalam model ini; di dunia nyata, penguapan juga terjadi sebelum air mendidih.</p>
+</main>
+<script>
+(() => {
+  'use strict';
+  const NS = 'http://www.w3.org/2000/svg';
+  const $ = id => document.getElementById(id);
+  const knob = $('knob'), stage = $('stage'), moleculesGroup = $('molecules');
+  const dots = [], wisps = [];
+  let power = 0, temperature = 25, waterAmount = 1, lastFrame = performance.now(), dragging = false;
+  const rand = (low, high) => low + Math.random() * (high - low);
+  const clamp = (x, low, high) => Math.min(high, Math.max(low, x));
+  const bounds = y => ({ left: 177 + (y - 211) * .105, right: 643 - (y - 211) * .105 });
+  for (let i = 0; i < 44; i++) {
+    const y = rand(226, 346), b = bounds(y), x = rand(b.left + 7, b.right - 7);
+    const angle = rand(0, Math.PI * 2), size = rand(2.8, 4.4);
+    const circle = document.createElementNS(NS, 'circle');
+    circle.setAttribute('r', size.toFixed(1));
+    circle.setAttribute('fill', i % 4 === 0 ? '#e6fcf6' : '#bbf1f0');
+    circle.setAttribute('opacity', rand(.75, .98).toFixed(2));
+    moleculesGroup.appendChild(circle);
+    dots.push({node:circle, x,y, vx:Math.cos(angle), vy:Math.sin(angle), size});
+  }
+  for (let i = 0; i < 22; i++) {
+    const path = document.createElementNS(NS, 'path');
+    path.setAttribute('d', i % 2 ? 'M -5 14 C -19 2 9 -7 0 -22 C -10 -36 13 -39 6 -53' : 'M 5 14 C 19 1 -9 -8 0 -23 C 10 -35 -13 -42 -6 -54');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', '#e4f2f1');
+    path.setAttribute('stroke-width', i % 3 === 0 ? '8' : '6');
+    path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute('opacity', '0');
+    $('steam').appendChild(path);
+    wisps.push({node:path, x:234 + (i * 149) % 355, y:115 + (i * 37) % 100, phase:i * 1.8});
+  }
+  function setPower(value) {
+    power = clamp(Math.round(value / 2) * 2, 0, 100);
+    $('powerValue').textContent = power;
+    $('status').textContent = power === 0 ? 'Api mati' : power === 100 ? 'Api maksimum' : `Api ${power}%`;
+    $('dialPointer').setAttribute('transform', `rotate(${-135 + 270 * power / 100} 594 489)`);
+    $('flames').setAttribute('opacity', power ? (0.38 + 0.62 * power / 100).toFixed(2) : '0');
+    $('flames').setAttribute('transform', `translate(0 ${442 * (1 - (.25 + .75 * power / 100))}) scale(1 ${.25 + .75 * power / 100})`);
+    $('heatGlow').setAttribute('opacity', (power / 100).toFixed(2));
+    knob.setAttribute('aria-valuenow', power);
+    knob.setAttribute('aria-valuetext', power === 0 ? 'Api mati' : `${power} persen`);
+  }
+  function pointerPower(event) {
+    const p = stage.createSVGPoint(); p.x = event.clientX; p.y = event.clientY;
+    const local = p.matrixTransform(stage.getScreenCTM().inverse());
+    const deg = Math.atan2(local.x - 594, 489 - local.y) * 180 / Math.PI;
+    // Busur kendali hanya sepanjang 270 derajat. Bagian kosong di bawah kenop dikunci ke ujung terdekat.
+    const angle = deg < -135 ? (deg < -180 ? 135 : -135) : deg > 135 ? (deg > 180 ? -135 : 135) : deg;
+    setPower((angle + 135) / 270 * 100);
+  }
+  knob.addEventListener('pointerdown', e => { dragging = true; knob.setPointerCapture(e.pointerId); pointerPower(e); knob.focus(); });
+  knob.addEventListener('pointermove', e => { if (dragging) pointerPower(e); });
+  knob.addEventListener('pointerup', () => { dragging = false; });
+  knob.addEventListener('pointercancel', () => { dragging = false; });
+  knob.addEventListener('keydown', e => {
+    if (['ArrowRight','ArrowUp','ArrowLeft','ArrowDown','Home','End'].includes(e.key)) e.preventDefault();
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') setPower(power + 2);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') setPower(power - 2);
+    if (e.key === 'Home') setPower(0);
+    if (e.key === 'End') setPower(100);
+  });
+  $('reset').addEventListener('click', () => {
+    setPower(0); temperature = 25; waterAmount = 1;
+    renderReadout(); renderWater(); renderSteam(0, performance.now());
+  });
+  function renderReadout() {
+    $('temperature').textContent = waterAmount > 0 ? temperature.toFixed(1) : '—';
+    $('tempFill').style.width = `${waterAmount > 0 ? clamp((temperature - 25) / 75 * 100, 0, 100) : 0}%`;
+    $('motionLabel').textContent = waterAmount <= 0 ? 'tidak ada air' : temperature < 39 ? 'pelan' : temperature < 63 ? 'sedang' : 'cepat';
+    $('waterValue').textContent = waterAmount > 0 ? Math.max(1, Math.round(waterAmount * 100)) : 0;
+    $('waterFill').style.width = `${waterAmount * 100}%`;
+    $('phaseLabel').textContent = waterAmount <= 0 ? 'Panci kosong · tekan Atur ulang' : temperature >= 99.95 ? 'Mendidih · air menguap' : waterAmount < 1 ? 'Air tersisa sedang mendingin' : 'Air belum mendidih';
+  }
+  function renderWater() {
+    const surfaceY = 211 + (1 - waterAmount) * 169;
+    $('waterLevelClip').setAttribute('y', surfaceY.toFixed(1));
+    $('waterLevelClip').setAttribute('height', (380 - surfaceY).toFixed(1));
+    const left = 174 + (surfaceY - 211) * .1, right = 646 - (surfaceY - 211) * .1;
+    $('waterSurface').setAttribute('d', `M${left.toFixed(1)} ${surfaceY.toFixed(1)} Q410 ${(surfaceY - 7).toFixed(1)} ${right.toFixed(1)} ${surfaceY.toFixed(1)}`);
+    $('waterSurface').setAttribute('opacity', waterAmount > .035 ? '.84' : '0');
+  }
+  function renderSteam(dt, now) {
+    const intensity = waterAmount > 0 ? clamp((temperature - 45) / 55, 0, 1) : 0;
+    const density = intensity * wisps.length;
+    for (let i = 0; i < wisps.length; i++) {
+      const wisp = wisps[i];
+      if (intensity > 0) {
+        wisp.y -= dt * (19 + 23 * intensity) * (0.8 + (i % 4) * 0.12);
+        if (wisp.y < 91) wisp.y = 210 + (i % 4) * 7;
+      }
+      const fade = clamp((wisp.y - 91) / 30, 0, 1) * clamp((221 - wisp.y) / 23, 0, 1);
+      wisp.node.setAttribute('opacity', (clamp(density - i, 0, 1) * (.13 + .22 * intensity) * fade).toFixed(3));
+      wisp.node.setAttribute('transform', `translate(${(wisp.x + Math.sin(now / 1100 + wisp.phase) * 7).toFixed(1)} ${wisp.y.toFixed(1)})`);
+    }
+  }
+  function tick(now) {
+    const dt = clamp((now - lastFrame) / 1000, 0, .05); lastFrame = now;
+    const target = 25 + .90 * power;
+    // Model sederhana: saat mendidih, kalor berikutnya mengurangi jumlah air, bukan menaikkan suhunya.
+    if (waterAmount > 0) {
+      temperature = Math.min(100, temperature + (target - temperature) * (1 - Math.exp(-dt / 3.2)));
+      if (temperature >= 100 && target > 100) {
+        waterAmount = Math.max(0, waterAmount - dt * .06 * (target - 100) / 15);
+      }
+    }
+    renderSteam(dt, now);
+    renderWater();
+    const speed = 18 + (temperature - 25) * 1.32;
+    for (let i = 0; i < dots.length; i++) {
+      const dot = dots[i];
+      const minY = Math.max(225 + dot.size, 211 + (1 - waterAmount) * 169 + dot.size + 3);
+      const maxY = 359 - dot.size;
+      const visible = i < Math.ceil(dots.length * waterAmount) && minY < maxY;
+      dot.node.setAttribute('visibility', visible ? 'visible' : 'hidden');
+      if (!visible) continue;
+      dot.x += dot.vx * speed * dt;
+      dot.y += dot.vy * speed * dt;
+      if (dot.y < minY) {dot.y = minY; dot.vy = Math.abs(dot.vy);}
+      if (dot.y > maxY) {dot.y = maxY; dot.vy = -Math.abs(dot.vy);}
+      const b = bounds(dot.y);
+      if (dot.x < b.left + dot.size) {dot.x = b.left + dot.size; dot.vx = Math.abs(dot.vx);}
+      if (dot.x > b.right - dot.size) {dot.x = b.right - dot.size; dot.vx = -Math.abs(dot.vx);}
+      dot.node.setAttribute('cx', dot.x.toFixed(1));
+      dot.node.setAttribute('cy', dot.y.toFixed(1));
+    }
+    renderReadout(); requestAnimationFrame(tick);
+  }
+  setPower(0); renderWater(); renderReadout(); requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
